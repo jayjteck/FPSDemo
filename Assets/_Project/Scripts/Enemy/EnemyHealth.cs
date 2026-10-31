@@ -36,8 +36,6 @@ namespace FPSDemo.Enemy
         /// <summary>受击（实现 IDamageable），死亡则触发事件</summary>
         public void TakeDamage(int amount, GameObject source)
         {
-            // 临时调试：看敌人是否真的收到伤害、当前血量
-            Debug.Log($"[敌人] 收到伤害 {amount}，当前 {_currentHealth}/{_maxHealth}，IsAlive={IsAlive}");
             if (!IsAlive)
                 return;
 

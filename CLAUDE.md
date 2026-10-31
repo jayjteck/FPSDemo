@@ -55,7 +55,6 @@
 - Image 的 `Filled` 模式不支持 Sliced（九宫格），圆角 sprite 会被拉伸；血条用纯色矩形（Source Image 清空，或纯白 sprite + `Color` 调色）。
 
 ## 下一步
-- 删除临时调试日志：`Weapon.PerformRaycast` 和 `EnemyHealth.TakeDamage` 里的 `Debug.Log`（射击/掉血问题定位完，已不需要）。
 - NavMesh 烘焙验证：烘焙后敌人能追击移动（现在只靠 `isOnNavMesh` 防御，没烘焙不报错但敌人不会动）。
 - UI 收尾：准星、hitmarker（命中变红，需武器广播 `OnHit` 事件）、血条引用验证。
 - GameManager：游戏状态（菜单/游戏中/暂停/结束）、计分、重开（订阅 `OnEnemyDied` / `OnPlayerDied`）。
