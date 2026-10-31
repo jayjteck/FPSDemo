@@ -26,10 +26,10 @@ namespace FPSDemo.Weapon
         public bool isAuto = true;        // 全自动（按住连发）/ 半自动（每按一次一发）
 
         [Header("扩散")]
-        public float spreadBase = 0.5f;   // 基础扩散（下限，永远存在的误差）
-        public float spreadPerShot = 1f;  // 每发增加的扩散
-        public float spreadMax = 8f;      // 扩散上限（连续射击封顶）
-        public float spreadRecovery = 6f; // 扩散每秒恢复量
+        public float spreadBase = 0.02f;   // 基础扩散（下限，≈1° 误差）
+        public float spreadPerShot = 0.02f; // 每发增加的扩散
+        public float spreadMax = 0.12f;     // 扩散上限（≈7°）
+        public float spreadRecovery = 0.1f; // 扩散每秒恢复量
 
         [Header("后坐力")]
         public float recoilKick = 1f;     // 镜头后坐力强度（传给 CameraShake）

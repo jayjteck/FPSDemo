@@ -152,13 +152,20 @@ namespace FPSDemo.Weapon
 
             if (Physics.Raycast(origin, dir, out RaycastHit hit, _data.range))
             {
-                // 命中火花：朝向命中面的法线
+                var damageable = hit.collider.GetComponent<IDamageable>();
+                // 临时调试：看打中了什么、有没有伤害接口
+                Debug.Log($"[射击] 命中 {hit.collider.name}，有IDamageable={damageable != null}，距离={hit.distance:F1}");
+
                 // 命中火花：世界坐标，固定在命中点（本就不该跟随）
                 SpawnEffect(_data.impactPrefab, null, hit.point, Quaternion.LookRotation(hit.normal));
 
                 // 统一走 IDamageable 接口，不关心打中的是敌人还是玩家
-                if (hit.collider.TryGetComponent<IDamageable>(out var damageable))
+                if (damageable != null)
                     damageable.TakeDamage(_data.damage, gameObject);
+            }
+            else
+            {
+                Debug.Log("[射击] 未命中任何物体（打空或超出射程）");
             }
         }
 

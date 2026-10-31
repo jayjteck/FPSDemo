@@ -96,12 +96,12 @@ namespace FPSDemo.Enemy
                     _agent.speed = _data.moveSpeed;
                     break;
                 case EnemyState.Attack:
-                    _agent.ResetPath();   // 停下，攻击时别乱走
-                    _attackTimer = 0f;    // 进入攻击立刻可以打一下
+                    if (_agent.enabled && _agent.isOnNavMesh)
+                        _agent.ResetPath();   // 停下，攻击时别乱走（未烘焙时跳过）
+                    _attackTimer = 0f;        // 进入攻击立刻可以打一下
                     break;
                 case EnemyState.Dead:
-                    _agent.isStopped = true;
-                    _agent.enabled = false;
+                    _agent.enabled = false;   // 直接禁用（不先 isStopped，避免未烘焙 NavMesh 时报错）
                     var col = GetComponent<Collider>();
                     if (col != null) col.enabled = false; // 死了不挡路、不再被射线命中
                     Destroy(gameObject, 2f);              // 2 秒后移除
@@ -136,7 +136,7 @@ namespace FPSDemo.Enemy
         {
             if (CanSeePlayer())
             {
-                _agent.SetDestination(_player.position);
+                SetAgentDestination(_player.position);
 
                 if (Vector3.Distance(transform.position, _player.position) <= _data.attackRange)
                     ChangeState(EnemyState.Attack);
@@ -222,12 +222,19 @@ namespace FPSDemo.Enemy
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * 10f);
         }
 
+        /// <summary>安全设置导航目标：agent 不在 NavMesh 上时（未烘焙/未放置）跳过，避免报错刷屏</summary>
+        private void SetAgentDestination(Vector3 pos)
+        {
+            if (_agent != null && _agent.enabled && _agent.isOnNavMesh)
+                _agent.SetDestination(pos);
+        }
+
         /// <summary>去下一个巡逻点（循环）</summary>
         private void GoToNextPatrolPoint()
         {
             if (_patrolPoints.Length == 0)
                 return;
-            _agent.SetDestination(_patrolPoints[_patrolIndex].position);
+            SetAgentDestination(_patrolPoints[_patrolIndex].position);
             _patrolIndex = (_patrolIndex + 1) % _patrolPoints.Length;
         }
 

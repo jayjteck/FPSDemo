@@ -21,10 +21,10 @@ MonoBehaviour:
   reserveAmmo: 35
   reloadTime: 2
   isAuto: 1
-  spreadBase: 0.5
-  spreadPerShot: 1
-  spreadMax: 8
-  spreadRecovery: 6
+  spreadBase: 0.02
+  spreadPerShot: 0.02
+  spreadMax: 0.12
+  spreadRecovery: 0.1
   recoilKick: 1
   muzzleFlashPrefab: {fileID: 100006, guid: e0ea61e7be57f5b45b2a3d22ee1bb31e, type: 3}
   impactPrefab: {fileID: 0}

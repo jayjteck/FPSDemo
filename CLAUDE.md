@@ -31,6 +31,7 @@
 15. `EnemyHealth.cs`：敌人血量，实现 `IDamageable`。
 16. `Core/Event/` 事件中心：`EventCenter`(单例) + `E_EventType` + `EventInfo` + `EventParams`；业务事件已从各自 `event` 迁移到事件中心（`AddEventListener` / `EventTrigger`）。
 17. `HUD.cs`（UI）：订阅事件中心显示血量/弹药/击杀数/死亡提示（血条 + TMP 文本）。
+18. `EnemyHealthBar.cs` + `EnemyHealthText.cs`（Enemy）：敌人头顶血条（图形条 / 3D 文字两种方案），billboard 面向相机，直接引用 `EnemyHealth`（局部一对一 UI，不走事件中心）。
 
 ## 场景结构约定
 - Player（CharacterController + PlayerController + CameraShake + PlayerHealth + WeaponManager）
@@ -39,6 +40,7 @@
   - 枪（挂 `Weapon` 组件，作为相机子物体；挂 CameraRoot 下会因 Cinemachine 一帧延迟而抖动）
 - CM vcam（CinemachineVirtualCamera：Follow=CameraRoot，**Body=Framing Transposer**，Aim=POV，**Accel/Decel Time=0**）
 - 敌人（NavMeshAgent + CapsuleCollider + EnemyHealth + EnemyAI，都挂根物体）
+  - 头顶血条（World Space Canvas + 纯色 Image Filled，挂 `EnemyHealthBar`；或 3D TMP 挂 `EnemyHealthText`）
 - Canvas（挂 `HUD` 脚本 + 血条/弹药/击杀 TMP 文本 + 中心准星 `+`）
 
 ## 关键坑（已踩过，别重犯）
@@ -48,8 +50,13 @@
 - Cinemachine 2.x 接口是 `AxisState.IInputAxisProvider`（不是 3.x 的 `Cinemachine.IInputAxisProvider`）。
 - FPS 枪要挂在 Main Camera 下，别挂 CameraRoot/Player 下（否则和 Cinemachine 差一帧会抖动）。
 - 事件中心是全局单例，会持有所有订阅者引用；会销毁的对象（敌人）必须在 `OnDestroy` 里 `RemoveEventListener`，否则内存泄漏。
+- NavMesh 未烘焙时，`SetDestination` / `isStopped` 都报 "can only be called on an active agent that has been placed on a NavMesh"；导航操作前要检查 `_agent.isOnNavMesh`。
+- `WeaponData` 的 spread 是「偏移向量分量」（不是角度），0.5 ≈ 26° 太大打不中，合理值 0.02（≈1°）左右。
+- Image 的 `Filled` 模式不支持 Sliced（九宫格），圆角 sprite 会被拉伸；血条用纯色矩形（Source Image 清空，或纯白 sprite + `Color` 调色）。
 
 ## 下一步
-- UI/HUD 场景搭建：搭 Canvas（挂 `HUD` 脚本、拖引用）+ 中心准星 + hitmarker（命中变红，需武器广播 `OnHit` 事件）。
+- 删除临时调试日志：`Weapon.PerformRaycast` 和 `EnemyHealth.TakeDamage` 里的 `Debug.Log`（射击/掉血问题定位完，已不需要）。
+- NavMesh 烘焙验证：烘焙后敌人能追击移动（现在只靠 `isOnNavMesh` 防御，没烘焙不报错但敌人不会动）。
+- UI 收尾：准星、hitmarker（命中变红，需武器广播 `OnHit` 事件）、血条引用验证。
 - GameManager：游戏状态（菜单/游戏中/暂停/结束）、计分、重开（订阅 `OnEnemyDied` / `OnPlayerDied`）。
-- 打磨：对象池预热 `Prewarm`、命中反馈、切枪动画（`WeaponState.Equipping`）、敌人 NavMesh 烘焙验证。
+- 打磨：对象池预热 `Prewarm`、命中反馈、切枪动画（`WeaponState.Equipping`）。
